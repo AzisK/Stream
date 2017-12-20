@@ -26,12 +26,18 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files['inputFile']
+    name = file.filename
+    fformat = name[-4:].lower()
 
-    newFile = Music(name=file.filename, media=file.read(), numplays=0, numlikes=0, dislikes=0)
-    db.session.add(newFile)
-    db.session.commit();
+    if fformat == '.mp3':
+        songName = name[:-4]
+        newFile = Music(name=songName, media=file.read(), numplays=0, numlikes=0, dislikes=0)
+        db.session.add(newFile)
+        db.session.commit();
 
-    return 'Saved ' + file.filename + ' to the database!'
+        return 'Saved ' + file.filename + ' to the database!'
+    else:
+        return 'Only .mp3 files are accepted!'
 
 @app.route('/download/<name>')
 def download(name):
@@ -80,7 +86,7 @@ def df():
     df = pd.io.sql.read_sql_query(q, conn)
     df.set_index(['id'], inplace=True)
     df.index.name=None
-    return render_template('view.html', tables=[df.to_html(classes='df')], titles = ['na', 'Dataframe'])
+    return render_template('view.html', tables=[df.to_html()], titles = ['na', 'Dataframe'])
 
 if __name__ == '__main__':
     app.run(debug=True)
