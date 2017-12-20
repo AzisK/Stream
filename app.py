@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, send_file, Response, stream_with_context
 from flask_sqlalchemy import SQLAlchemy
+import psycopg2
 from io import BytesIO
 import os
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://:postgres@localhost/postgres'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://mntuzyvzcgjlsu:82272757136c01021ad21469e052f8ad43df98927ccc23c8dccc200447bcc98a@ec2-54-217-250-0.eu-west-1.compute.amazonaws.com:5432/d713cmvmuhr4jd'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres+psycopg2://mntuzyvzcgjlsu:82272757136c01021ad21469e052f8ad43df98927ccc23c8dccc200447bcc98a@ec2-54-217-250-0.eu-west-1.compute.amazonaws.com:5432/d713cmvmuhr4jd'
 db = SQLAlchemy(app)
 
 class Music(db.Model):
