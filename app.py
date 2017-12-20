@@ -25,7 +25,7 @@ def index():
 def upload():
     file = request.files['inputFile']
 
-    newFile = Music(name=file.filename, media=file.read())
+    newFile = Music(name=file.filename, media=file.read(), numplays=0, numlikes=0, dislikes=0)
     db.session.add(newFile)
     db.session.commit();
 
