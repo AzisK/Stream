@@ -2,7 +2,7 @@
 verify_ssl = true
 
 [packages]
-Flask = "*"
+flask = "*"
 flask_sqlalchemy = "*"
 
 [requires]
