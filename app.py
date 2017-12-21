@@ -29,7 +29,7 @@ def upload():
     name = file.filename
     fformat = name[-4:].lower()
 
-    if fformat == '.mp3':
+    if fformat == '.mp3' && len(name) > 4:
         songName = name[:-4]
         newFile = Music(name=songName, media=file.read(), numplays=0, numlikes=0, dislikes=0)
         db.session.add(newFile)
