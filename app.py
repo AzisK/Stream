@@ -25,17 +25,22 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    file = request.files['inputFile']
-    name = file.filename
-    fformat = name[-4:].lower()
+    files = request.files.getlist('file[]')
+    fileNames = ''
+    for file in files:
+        name = file.filename
+        fformat = name[-4:].lower()
 
-    if (fformat == '.mp3') & (len(name) > 4):
-        songName = name[:-4]
-        newFile = Music(name=songName, media=file.read(), numplays=0, numlikes=0, dislikes=0)
-        db.session.add(newFile)
-        db.session.commit();
+        if (fformat == '.mp3') & (len(name) > 4):
+            songName = name[:-4]
+            newFile = Music(name=songName, media=file.read(), numplays=0, numlikes=0, dislikes=0)
+            db.session.add(newFile)
+            db.session.commit();
 
-        return 'Saved ' + file.filename + ' to the database!'
+            fileNames += name + ', '
+
+    if fileNames:
+        return 'Saved ' + fileNames[:-2] + ' to the database!'
     else:
         return 'Only .mp3 files are accepted!'
 

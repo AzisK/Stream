@@ -1,22 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, intial-scale=1">
-	<title>Stream music</title>
-	<link href="https://unpkg.com/picnic" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, intial-scale=1">
+    <title>Stream music</title>
+    <link href="https://unpkg.com/picnic" rel="stylesheet">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-	<div>
-		<h1>Add your favorite music!</h1>
-		<form method="POST" action="/upload" enctype="multipart/form-data">
-			<div class="form-group">
-				<label class="inputFile">File input</label>
-				<input type="file" name="inputFile">
-			</div>
-			<button type="submit">Submit</button>
-		</form>
-	</div>
+    <div>
+        <h1>Add your favorite music!</h1>
+        <form method="POST" action="/upload" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Selected music</label>
+                <div class="upload">
+                    <input type="file" id="inputf" name="file[]" multiple>
+                    <label for="inputf">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-reactid="1221">
+                            <polyline points="16 16 12 12 8 16"></polyline>
+                            <line x1="12" y1="12" x2="12" y2="21"></line>
+                            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                            <polyline points="16 16 12 12 8 16"></polyline></svg>
+                        Drop or browse!
+                    </label>
+
+                    
+                </div>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <output id="list"></output>
+    </div>
+
+
+    <script>
+        songsList = document.getElementById('list');
+
+        function handleFileSelect(evt) {
+            var files = evt.target.files; // FileList object
+
+            // files is a FileList of File objects. List some properties.
+            var output = [];
+            for (var i = 0, f; f = files[i]; i++) {
+              output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                          Math.round(f.size / 1028 / 1028 * 100) / 100, ' MB, last modified: ',
+                          f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                          '</li>');
+            }
+            songsList.innerHTML = '<ul>' + output.join('') + '</ul>';
+        }
+
+        document.getElementById('inputf').addEventListener('change', handleFileSelect);
+    </script>
 
 </body>
 </html>

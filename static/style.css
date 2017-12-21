@@ -1,11 +1,10 @@
-body            { font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;}
-a, h1, h2       { color: #377ba8; }
-h1, h2          { margin: 0; }
-h1              { border-bottom: 2px solid #eee; }
-h2              { font-size: 1.2em; }
-
 table {
   width: 100%;
+}
+
+svg {
+	vertical-align: middle;
+	width: 3em;
 }
 
 table.dataframe, .dataframe th, .dataframe td {
@@ -21,4 +20,33 @@ table.dataframe, .dataframe th, .dataframe td {
 tr:nth-child(odd)		{ background-color:#eee; }
 tr:nth-child(even)	{ background-color:#fff; }
 
-tr:hover            { background-color: #ffff99;}
+tr:hover            { background-color: #ffff99; }
+
+.upload {
+	padding: 2em;
+	text-align: center;
+	border: 1px solid #ccc;
+	background: #BDDAFF;
+}
+
+/*Hide default input*/
+#inputf {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+#inputf + label {
+	padding: 1em 4em;
+	color: #0074d9;
+    display: inline-block;
+    border: 2px solid currentColor;
+}
+
+#inputf:focus + label,
+#inputf + label:hover {
+	color: #0065c6;
+}
