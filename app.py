@@ -97,7 +97,7 @@ def df():
 
 @app.route('/mp3')
 def mp3():
-    mp3file = "static/Uga.mp3"
+    mp3file = "static//music//Uga.mp3"
     process = Popen(['cat', mp3file], stdout=PIPE, bufsize=-1)
     read_chunk = partial(os.read, process.stdout.fileno(), 1024)
     return Response(iter(read_chunk, b''), mimetype='audio/mp3')
