@@ -4,6 +4,8 @@ import psycopg2
 import pandas as pd
 from io import BytesIO
 import os
+from functools import partial
+from subprocess import Popen, PIPE
 
 app = Flask(__name__)
 DATABASE_URI = 'postgres+psycopg2://mntuzyvzcgjlsu:82272757136c01021ad21469e052f8ad43df98927ccc23c8dccc200447bcc98a@ec2-54-217-250-0.eu-west-1.compute.amazonaws.com:5432/d713cmvmuhr4jd'
@@ -92,6 +94,13 @@ def df():
     df.set_index(['id'], inplace=True)
     df.index.name=None
     return render_template('view.html', tables=[df.to_html()], titles = ['na', 'Dataframe'])
+
+@app.route('/mp3')
+def mp3():
+    mp3file = "static/Uga.mp3"
+    process = Popen(['cat', mp3file], stdout=PIPE, bufsize=-1)
+    read_chunk = partial(os.read, process.stdout.fileno(), 1024)
+    return Response(iter(read_chunk, b''), mimetype='audio/mp3')
 
 if __name__ == '__main__':
     app.run(debug=True)
