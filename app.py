@@ -55,14 +55,15 @@ def upload():
     else:
         return 'Only .mp3 files are accepted!'
 
-@app.route('/download/<name>')
-def download(name):
-    data = Music.query.filter_by(name=name).first()
+@app.route('/download/<id>')
+def download(id):
+    data = Music.query.filter_by(id=id).first()
     return send_file(BytesIO(data.media), attachment_filename=data.name, as_attachment=True)
 
-@app.route('/stream/<name>')
-def stream(name):
-    mp3file = 'static//music//{0}{1}'.format(name, '.mp3')
+@app.route('/stream/<id>')
+def stream(id):
+    row = Music.query.filter_by(id=id).first()
+    mp3file = 'static//music//{0}{1}'.format(row.name, '.mp3')
     process = Popen(['cat', mp3file], stdout=PIPE, bufsize=-1)
     read_chunk = partial(os.read, process.stdout.fileno(), 1024)
     return Response(iter(read_chunk, b''), mimetype='audio/mp3')
