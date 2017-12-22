@@ -40,7 +40,7 @@ def upload():
     fileNames = ''
     for file in files:
         if allowed_file(file.filename):
-            filename = file.filename
+            filename = file.filename[:-4]
             author = getAuthor(filename)
             root = os.path.dirname(os.path.realpath(__file__))
             file.save(os.path.join(root, 'static', 'music', filename))
