@@ -69,8 +69,7 @@ def stream(name):
 
 @app.route('/delete/<id>')
 def delete(id):
-    # name = 'SELECT name FROM music WHERE id = {}'.format(id)
-    # db.engine.execute(name)
+    name = Music.query.filter_by(id=2).first()
     q = 'DELETE FROM music WHERE id = {}'.format(id)
     db.engine.execute(q)
     return 'Music with {} deleted'.format(id)
@@ -80,7 +79,7 @@ def songs():
     data = Music.query.all()
     List = ''
     for i in data:
-        List += '{0},{1},{2},{3}*'.format(str(i.id), i.name, str(i.numplays), str(i.numlikes))
+        List += '{0},{1},{2},{3},{4}*'.format(str(i.id), i.name, i.author, str(i.numplays), str(i.numlikes))
     return List
 
 @app.route('/playadd')
@@ -107,7 +106,7 @@ def dislikeAdd():
 @app.route('/df')
 def df():
     conn = psycopg2.connect("dbname='d713cmvmuhr4jd' user='mntuzyvzcgjlsu' host='ec2-54-217-250-0.eu-west-1.compute.amazonaws.com' password='82272757136c01021ad21469e052f8ad43df98927ccc23c8dccc200447bcc98a'")
-    q = "SELECT id, name, numplays, numlikes, dislikes FROM music"
+    q = "SELECT * FROM music"
     df = pd.io.sql.read_sql_query(q, conn)
     df.set_index(['id'], inplace=True)
     df.index.name=None
@@ -119,6 +118,14 @@ def view():
     for file in os.listdir('static/music'):
         files += file + ', '
     return files[:-2]
+
+@app.route('/flush')
+def flush():
+    files = ''
+    for file in os.listdir('static/music'):
+        os.remove(os.path.join('static', 'music', file))
+        files += file + ', '
+    return files[:-2] + ' deleted'
 
 if __name__ == '__main__':
     app.run(debug=True)
