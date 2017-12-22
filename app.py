@@ -62,9 +62,10 @@ def download(name):
 
 @app.route('/stream/<name>')
 def stream(name):
-    data = Music.query.filter_by(name=name).first()
-    file = BytesIO(data.media)
-    return Response(stream_with_context(file), mimetype='audio/mp3')
+    mp3file = 'static//music//{0}{1}'.format(name, '.mp3')
+    process = Popen(['cat', mp3file], stdout=PIPE, bufsize=-1)
+    read_chunk = partial(os.read, process.stdout.fileno(), 1024)
+    return Response(iter(read_chunk, b''), mimetype='audio/mp3')
 
 @app.route('/delete/<id>')
 def delete(id):
@@ -111,13 +112,6 @@ def df():
     df.set_index(['id'], inplace=True)
     df.index.name=None
     return render_template('view.html', tables=[df.to_html()], titles = ['na', 'Dataframe'])
-
-@app.route('/play/<name>')
-def play(name):
-    mp3file = 'static//music//{0}{1}'.format(name, '.mp3')
-    process = Popen(['cat', mp3file], stdout=PIPE, bufsize=-1)
-    read_chunk = partial(os.read, process.stdout.fileno(), 1024)
-    return Response(iter(read_chunk, b''), mimetype='audio/mp3')
 
 @app.route('/view')
 def view():
