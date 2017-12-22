@@ -40,13 +40,13 @@ def upload():
     fileNames = ''
     for file in files:
         if allowed_file(file.filename):
-            filename = file.filename[:-4]
+            filename = file.filename
             author = getAuthor(filename)
             root = os.path.dirname(os.path.realpath(__file__))
             file.save(os.path.join(root, 'static', 'music', filename))
             fileNames += filename + ', '
 
-            newFile = Music(name=filename, author=author, numplays=0, numlikes=0, dislikes=0)
+            newFile = Music(name=filename[:-4], author=author, numplays=0, numlikes=0, dislikes=0)
             db.session.add(newFile)
             db.session.commit();
 
