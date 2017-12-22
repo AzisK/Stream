@@ -69,10 +69,11 @@ def stream(name):
 
 @app.route('/delete/<id>')
 def delete(id):
-    name = Music.query.filter_by(id=2).first()
+    row = Music.query.filter_by(id=id).first()
+    os.remove(os.path.join('static', 'music', row.name))
     q = 'DELETE FROM music WHERE id = {}'.format(id)
     db.engine.execute(q)
-    return 'Music with {} deleted'.format(id)
+    return 'Music with id={0} and name={1} deleted'.format(id, row.name)
 
 @app.route('/songs')
 def songs():
