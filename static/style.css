@@ -50,7 +50,3 @@ tr:hover            { background-color: #ffff99; }
 #inputf + label:hover {
 	color: #0065c6;
 }
-
-li input {
-	width: 200px;
-}
