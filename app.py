@@ -70,7 +70,7 @@ def stream(name):
 @app.route('/delete/<id>')
 def delete(id):
     row = Music.query.filter_by(id=id).first()
-    os.remove(os.path.join('static', 'music', row.name))
+    os.remove(os.path.join('static', 'music', row.name + '.mp3'))
     q = 'DELETE FROM music WHERE id = {}'.format(id)
     db.engine.execute(q)
     return 'Music with id={0} and name={1} deleted'.format(id, row.name)
