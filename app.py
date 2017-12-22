@@ -6,7 +6,6 @@ from io import BytesIO
 import os
 from functools import partial
 from subprocess import Popen, PIPE
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 DATABASE_URI = 'postgres+psycopg2://mntuzyvzcgjlsu:82272757136c01021ad21469e052f8ad43df98927ccc23c8dccc200447bcc98a@ec2-54-217-250-0.eu-west-1.compute.amazonaws.com:5432/d713cmvmuhr4jd'
@@ -18,12 +17,15 @@ ALLOWED_EXTENSIONS = set(['mp3'])
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS and '..' not in filename
+
+def getAuthor(name):
+    return name.split('-')[0]
 
 class Music(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    media = db.Column(db.LargeBinary)
+    author = db.Column(db.String(100))
     numplays = db.Column(db.Integer)
     numlikes = db.Column(db.Integer)
     dislikes = db.Column(db.Integer)
@@ -42,7 +44,7 @@ def upload():
 
         if (fformat == '.mp3') & (len(name) > 4):
             songName = name[:-4]
-            newFile = Music(name=songName, media=file.read(), numplays=0, numlikes=0, dislikes=0)
+            newFile = Music(name=songName, numplays=0, numlikes=0, dislikes=0)
             db.session.add(newFile)
             db.session.commit();
 
@@ -66,6 +68,8 @@ def stream(name):
 
 @app.route('/delete/<id>')
 def delete(id):
+    # name = 'SELECT name FROM music WHERE id = {}'.format(id)
+    # db.engine.execute(name)
     q = 'DELETE FROM music WHERE id = {}'.format(id)
     db.engine.execute(q)
     return 'Music with {} deleted'.format(id)
@@ -121,11 +125,20 @@ def add():
     fileNames = ''
     for file in files:
         if allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+            filename = file.filename
+            author = getAuthor(filename)
             root = os.path.dirname(os.path.realpath(__file__))
             file.save(os.path.join(root, 'static', 'music', filename))
             fileNames += filename + ', '
-    return 'Saved ' + fileNames[:-2] + ' to the server!'
+
+            newFile = Music(name=filename, author=author, numplays=0, numlikes=0, dislikes=0)
+            db.session.add(newFile)
+            db.session.commit();
+
+    if fileNames:
+        return 'Saved ' + fileNames[:-2] + ' to the database!'
+    else:
+        return 'Only .mp3 files are accepted!'
 
 @app.route('/view')
 def view():
