@@ -6,12 +6,19 @@ from io import BytesIO
 import os
 from functools import partial
 from subprocess import Popen, PIPE
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 DATABASE_URI = 'postgres+psycopg2://mntuzyvzcgjlsu:82272757136c01021ad21469e052f8ad43df98927ccc23c8dccc200447bcc98a@ec2-54-217-250-0.eu-west-1.compute.amazonaws.com:5432/d713cmvmuhr4jd'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://:postgres@localhost/postgres'
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 db = SQLAlchemy(app)
+
+ALLOWED_EXTENSIONS = set(['mp3'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class Music(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,6 +64,12 @@ def stream(name):
     file = BytesIO(data.media)
     return Response(stream_with_context(file), mimetype='audio/mp3')
 
+@app.route('/delete/<id>')
+def delete(id):
+    q = 'DELETE FROM music WHERE id = {}'.format(id)
+    db.engine.execute(q)
+    return 'Music with {} deleted'.format(id)
+
 @app.route('/songs')
 def songs():
     data = Music.query.all()
@@ -95,12 +108,31 @@ def df():
     df.index.name=None
     return render_template('view.html', tables=[df.to_html()], titles = ['na', 'Dataframe'])
 
-@app.route('/mp3')
-def mp3():
-    mp3file = "static//music//Uga.mp3"
+@app.route('/play/<name>')
+def play(name):
+    mp3file = 'static//music//{0}{1}'.format(name, '.mp3')
     process = Popen(['cat', mp3file], stdout=PIPE, bufsize=-1)
     read_chunk = partial(os.read, process.stdout.fileno(), 1024)
     return Response(iter(read_chunk, b''), mimetype='audio/mp3')
+
+@app.route('/add', methods=['POST'])
+def add():
+    files = request.files.getlist('file[]')
+    fileNames = ''
+    for file in files:
+        if allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            root = os.path.dirname(os.path.realpath(__file__))
+            file.save(os.path.join(root, 'static', 'music', filename))
+            fileNames += filename + ', '
+    return 'Saved ' + fileNames[:-2] + ' to the server!'
+
+@app.route('/view')
+def view():
+    files = ''
+    for file in os.listdir('static/music'):
+        files += file + ', '
+    return files[:-2]
 
 if __name__ == '__main__':
     app.run(debug=True)
