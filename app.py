@@ -20,7 +20,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS and '..' not in filename
 
 def getAuthor(name):
-    return name.split('-')[0]
+    return name.split('-')[0][:-1]
 
 class Music(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,12 +37,12 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload():
     files = request.files.getlist('file[]')
+    root = os.path.dirname(os.path.realpath(__file__))
     fileNames = ''
     for file in files:
         if allowed_file(file.filename):
             filename = file.filename
             author = getAuthor(filename)
-            root = os.path.dirname(os.path.realpath(__file__))
             file.save(os.path.join(root, 'static', 'music', filename))
             fileNames += filename + ', '
 
