@@ -39,16 +39,16 @@ def upload():
     files = request.files.getlist('file[]')
     fileNames = ''
     for file in files:
-        name = file.filename
-        fformat = name[-4:].lower()
+        if allowed_file(file.filename):
+            filename = file.filename
+            author = getAuthor(filename)
+            root = os.path.dirname(os.path.realpath(__file__))
+            file.save(os.path.join(root, 'static', 'music', filename))
+            fileNames += filename + ', '
 
-        if (fformat == '.mp3') & (len(name) > 4):
-            songName = name[:-4]
-            newFile = Music(name=songName, numplays=0, numlikes=0, dislikes=0)
+            newFile = Music(name=filename, author=author, numplays=0, numlikes=0, dislikes=0)
             db.session.add(newFile)
             db.session.commit();
-
-            fileNames += name + ', '
 
     if fileNames:
         return 'Saved ' + fileNames[:-2] + ' to the database!'
@@ -118,27 +118,6 @@ def play(name):
     process = Popen(['cat', mp3file], stdout=PIPE, bufsize=-1)
     read_chunk = partial(os.read, process.stdout.fileno(), 1024)
     return Response(iter(read_chunk, b''), mimetype='audio/mp3')
-
-@app.route('/add', methods=['POST'])
-def add():
-    files = request.files.getlist('file[]')
-    fileNames = ''
-    for file in files:
-        if allowed_file(file.filename):
-            filename = file.filename
-            author = getAuthor(filename)
-            root = os.path.dirname(os.path.realpath(__file__))
-            file.save(os.path.join(root, 'static', 'music', filename))
-            fileNames += filename + ', '
-
-            newFile = Music(name=filename, author=author, numplays=0, numlikes=0, dislikes=0)
-            db.session.add(newFile)
-            db.session.commit();
-
-    if fileNames:
-        return 'Saved ' + fileNames[:-2] + ' to the database!'
-    else:
-        return 'Only .mp3 files are accepted!'
 
 @app.route('/view')
 def view():
