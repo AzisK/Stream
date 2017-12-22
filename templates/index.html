@@ -10,9 +10,9 @@
 <body>
     <div>
         <h1>Add your favorite music!</h1>
-        <form method="POST" action="/upload" enctype="multipart/form-data">
+        <form method="POST" action="/add" enctype="multipart/form-data">
             <div class="form-group">
-                <label>Selected music</label>
+                <label>Select your mp3s</label>
                 <div class="upload">
                     <input type="file" id="inputf" name="file[]" multiple>
                     <label for="inputf">
@@ -36,23 +36,69 @@
 
 
     <script>
-        songsList = document.getElementById('list');
+        var songsList = document.getElementById('list');
+        var files;
+        var currenti;
+
+        
 
         function handleFileSelect(evt) {
-            var files = evt.target.files; // FileList object
+            files = evt.target.files; // FileList object
 
             // files is a FileList of File objects. List some properties.
             var output = [];
+
+            output.push('<li style="color: grey;"><strong>Author - Song.mp3</strong>,',
+                ' (file type) - size MB, last modified: date</li>');
+
             for (var i = 0, f; f = files[i]; i++) {
-              output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-                          Math.round(f.size / 1028 / 1028 * 100) / 100, ' MB, last modified: ',
-                          f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-                          '</li>');
+                if (f.name.slice(-3) == 'mp3') {
+                    var name = f.name;
+                    var splitName = name.split('-');
+                    var author = splitName[0].trim();
+                    var song = splitName[1].trim().slice(0, -4);
+                    output.push('<li><strong><input class="author', i, '" value="', author, '">', 
+                                '<input class="song" value="', song,'"></strong> (', f.type || 'n/a',
+                                ') - ', returnMB(f.size), ' MB, last modified: ', 
+                                f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
+                } else {
+                    output.push('<li><strong>', name, '</strong> (', f.type || 'n/a', ') - ',
+                                returnMB(f.size), ' MB, last modified: ',
+                                f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                                '</li>');
+                }
             }
+
             songsList.innerHTML = '<ul>' + output.join('') + '</ul>';
+            connectToInputs();
         }
 
         document.getElementById('inputf').addEventListener('change', handleFileSelect);
+
+        function connectToInputs() {
+            for (var i = 0, f; f = files[i]; i++) {
+                if (f.name.slice(-3) == 'mp3') {
+                    document.querySelector('.author' + i).addEventListener('change', updateFileName);
+                }
+            }
+
+            function updateFileName () {
+                var i = this.className.slice(-1);
+                var mp3 = splitMp3(files[i].name);
+                files[i].name = this.value + ' - ' + mp3.song;
+            }
+        }
+
+        function returnMB(size) {
+           return Math.round(size / 1028 / 1028 * 100) / 100; 
+        }
+
+        function splitMp3(name) {
+            var splitName = name.split('-');
+            var author = splitName[0].trim();
+            var song = splitName[1].trim();
+            return { author, song };
+        }
     </script>
 
 </body>
